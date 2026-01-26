@@ -125,5 +125,3 @@ Day 16 focused on creating an **IAM user as a discrete identity**, reinforcing s
 * Creating identities without permissions by default
 * Preparing for scalable access via groups and roles
 ---
-
-📅 **Next Up: Day 17 – Create IAM Group and Assign Permissions**
