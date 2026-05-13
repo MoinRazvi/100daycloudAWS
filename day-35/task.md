@@ -2,7 +2,7 @@
 #
 1) Task Details:
 
-- Create a private RDS instance named datacenter-rds using a sandbox template.
+- Create a private RDS instance named datacenter-rds using a sandbox template..
 - The engine type must be MySQL v8.4.5, and it must be a db.t3.micro type instance.
 - The master username must be datacenter_admin with an appropriate password.
 - The RDS storage type must be gp2, and the storage size must be 5GiB.
