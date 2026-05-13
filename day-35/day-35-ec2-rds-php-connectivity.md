@@ -1,4 +1,4 @@
-# Day 35 – EC2 to Private RDS MySQL Connectivity Using PHP
+# 🚀 Day 35 – EC2 to Private RDS MySQL Connectivity Using PHP
 
 ## 📘 Topic
 
