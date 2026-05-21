@@ -1,0 +1,12 @@
+🛠️ Hands-On Volume Commands
+# 1. Confirm volume block size (e.g. shows 12G)
+lsblk
+
+# 2. Grow the partition on the physical drive
+sudo growpart /dev/xvda 1
+
+# 3. Expand the XFS filesystem to recognize the new blocks
+sudo xfs_growfs /
+
+# 4. Verify completion
+df -h /
