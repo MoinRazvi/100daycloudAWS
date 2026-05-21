@@ -1,0 +1,77 @@
+### === STEP 1: Copy launch key to public instance (run FROM AWS CLINET )
+scp -i /root/.ssh/REPLACE_WITH_YOUR_KEY.pem \
+    /root/.ssh/REPLACE_WITH_YOUR_KEY.pem \
+    ubuntu@REPLACE_WITH_PUBLIC_EC2_PUBLIC_IP:/home/ubuntu/.ssh/REPLACE_WITH_YOUR_KEY.pem
+
+### === STEP 2: SSH into public instance (from AWS CLIENT) ===
+ssh -i /root/.ssh/REPLACE_WITH_YOUR_KEY.pem ubuntu@REPLACE_WITH_PUBLIC_EC2_PUBLIC_IP
+
+### On public instance - secure the copied key
+chmod 400 /home/ubuntu/.ssh/REPLACE_WITH_YOUR_KEY.pem
+
+### === STEP 3: From public instance → connect to private ===
+ssh -i /home/ubuntu/.ssh/REPLACE_WITH_YOUR_KEY.pem ubuntu@REPLACE_WITH_PRIVATE_EC2_PRIVATE_IP
+
+### === STEP 4: On private instance - generate dedicated transfer key ===
+ssh-keygen -t ed25519 -f ~/.ssh/log_transfer_key -C "log-transfer" -N ""
+
+### Show public key (copy the entire output line)
+cat ~/.ssh/log_transfer_key.pub
+
+### Exit private instance (back to public)
+exit
+
+### === STEP 5: On public instance - add the public key you copied ===
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+
+### Paste the full public key line you copied from private instance here
+echo 'ssh-ed25519 PASTE_YOUR_GENERATED_PUBLIC_KEY_HERE log-transfer' >> ~/.ssh/authorized_keys
+
+chmod 600 ~/.ssh/authorized_keys
+
+### === STEP 6: Test SCP (from public → private again) ===
+ssh -i /home/ubuntu/.ssh/REPLACE_WITH_YOUR_KEY.pem ubuntu@REPLACE_WITH_PRIVATE_EC2_PRIVATE_IP
+
+### On private instance - test transfer OPTIONAL
+scp -i ~/.ssh/log_transfer_key \
+    -o StrictHostKeyChecking=no \
+    -o UserKnownHostsFile=/dev/null \
+    /var/log/boots.log ubuntu@REPLACE_WITH_PUBLIC_EC2_PRIVATE_IP:/tmp/boots.log
+
+### === STEP 7: On private instance - add cron job (every minute) ===
+crontab -e
+
+### Add this line (paste into crontab editor):
+* * * * * /usr/bin/scp -i /home/ubuntu/.ssh/log_transfer_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /var/log/boots.log ubuntu@REPLACE_WITH_PUBLIC_EC2_PRIVATE_IP:/tmp/boots.log >> /home/ubuntu/scp-transfer.log 2>&1
+
+### Save and exit editor, then verify:
+crontab -l
+
+### Exit private → back to public
+exit
+
+# === STEP 8: On public instance - install AWS CLI v2 via Snap ===
+sudo apt update
+sudo apt install snapd -y
+sudo snap install aws-cli --classic
+aws --version
+
+### Test manual upload
+aws s3 cp /tmp/boots.log s3://REPLACE_WITH_YOUR_S3_BUCKET_NAME/REPLACE_WITH_YOUR_PRIVATE_VPC_NAME/boots.log
+
+### === STEP 9: On public instance - add S3 upload cron ===
+crontab -e
+
+### Add this line (paste into crontab editor):
+ * * * * * /snap/bin/aws s3 cp /tmp/boots.log s3://REPLACE_WITH_YOUR_S3_BUCKET_NAME/REPLACE_WITH_YOUR_PRIVATE_VPC_NAME/boot/boots.log >> /home/ubuntu/s3-upload.log 2>&1
+
+### Save and exit, then verify:
+crontab -l
+
+### === STEP 10: Monitoring commands (run on public instance) ===
+tail -f ~/s3-upload.log
+ls -l /tmp/boots.log
+
+# On private instance (optional):
+tail -f ~/scp-transfer.log
