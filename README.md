@@ -72,3 +72,7 @@ This repository reflects **consistent practice, troubleshooting, and architectur
 
 This repository is for **learning and demonstration purposes**.
 Configurations should be adapted and reviewed before use in production environments.
+
+---
+
+<img width="2250" height="1600" alt="100-Cloud-AWS" src="https://github.com/user-attachments/assets/1c4bddd0-505d-4a03-99ef-1a91e30b5a50" />
